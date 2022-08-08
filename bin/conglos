@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+# Copyright 2022 Peter Wagener <mail@peterwagener.net>
+#
+# This file is part of the Unicorn framework.
+#
+# Unicorn is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Unicorn is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Unicorn. If not, see <https://www.gnu.org/licenses/>.
+
+import unicorn
+
+mqtt_host = "mqtt"
+mqtt_port = 1883
+mqtt_proxy = None
+
+exit(
+  unicorn.shell.run(mqtt_host=mqtt_host,
+                    mqtt_port=mqtt_port,
+                    mqtt_proxy=mqtt_proxy,
+                    fn_history=None,
+                    fn_cache=None))

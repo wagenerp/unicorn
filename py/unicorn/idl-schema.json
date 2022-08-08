@@ -1,0 +1,420 @@
+{
+  "title": "unicorn idl schema",
+  "$id": "idl-schema.json",
+  "description": "",
+  "definitions": {
+    "stringOrNull": {
+      "$id": "#stringOrNull",
+      "oneOf": [{
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "stringStringsOrNull": {
+      "$id": "#stringStringsOrNull",
+      "oneOf": [{
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "numberOrNull": {
+      "$id": "#numberOrNull",
+      "oneOf": [{
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "booleanOrNull": {
+      "$id": "#booleanOrNull",
+      "oneOf": [{
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nameProperty": {
+      "$id": "#nameProperty",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        }
+      }
+    },
+    "requireName": {
+      "$id": "#requireName",
+      "type": "object",
+      "required": [
+        "name"
+      ]
+    },
+    "sistring": {
+      "$id": "#sistring",
+      "type": "string",
+      "pattern": "^1|[YZEPTGMkdcmuµnpfazy]?(m|g|s|A|K|mol|cd|Hz|rad|sr|N|Pa|J|W|C|V|F|Ohm|S|Wb|T|H|lm|lx|Bq|Gy|Sv|kat)([+-][0-9]+)?([.][YZEPTGMkdcmuµnpfazy]?(m|g|s|A|K|mol|cd|Hz|rad|sr|N|Pa|J|W|C|V|F|Ohm|S|Wb|T|H|lm|lx|Bq|Gy|Sv|kat)([+-][0-9]+))*$"
+    },
+    "eventItem": {
+      "$id": "#eventItem",
+      "allOf": [{
+          "$ref": "#/definitions/nameProperty"
+        },
+        {
+          "oneOf": [{
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "pattern": "^(key|mask)$"
+                },
+                "count": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "count"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "pattern": "^(states)$"
+                },
+                "states": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              },
+              "required": [
+                "states"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "pattern": "^(numeric)$"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "measurementItem": {
+      "$id": "#measurementItem",
+      "allOf": [{
+          "$ref": "#/definitions/nameProperty"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "unit": {
+              "$ref": "#/definitions/sistring"
+            }
+          },
+          "required": [
+            "unit"
+          ]
+        }
+      ]
+    },
+    "completionNode": {
+      "$id": "#completionNode",
+      "oneOf": [{
+          "$ref": "#/definitions/completionEmpty"
+        },
+        {
+          "allOf": [{
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type"
+              ]
+            },
+            {
+              "oneOf": [{
+                  "$ref": "#/definitions/completionReference"
+                },
+                {
+                  "$ref": "#/definitions/completionKeyword"
+                },
+                {
+                  "$ref": "#/definitions/completionSequence"
+                },
+                {
+                  "$ref": "#/definitions/completionRepeat"
+                },
+                {
+                  "$ref": "#/definitions/completionString"
+                },
+                {
+                  "$ref": "#/definitions/completionNumber"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "completionReference": {
+      "$id": "#completionReference",
+      "type": "object",
+      "properties": {
+        "type": {
+          "pattern": "^reference$"
+        },
+        "ref": {
+          "type": "string"
+        }
+      }
+    },
+    "completionKeyword": {
+      "$id": "#completionKeyword",
+      "type": "object",
+      "properties": {
+        "type": {
+          "pattern": "^keyword$"
+        },
+        "stmts": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "$ref": "#/definitions/completionNode"
+            }
+          }
+        }
+      },
+      "required": [
+        "stmts"
+      ]
+    },
+    "completionSequence": {
+      "$id": "#completionSequence",
+      "type": "object",
+      "properties": {
+        "type": {
+          "pattern": "^sequence$"
+        },
+        "stmts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/completionNode"
+          }
+        }
+      },
+      "required": [
+        "stmts"
+      ]
+    },
+    "completionRepeat": {
+      "$id": "#completionRepeat",
+      "type": "object",
+      "properties": {
+        "type": {
+          "pattern": "^repeat$"
+        },
+        "stmt": {
+          "$ref": "#/definitions/completionNode"
+        },
+        "end": {
+          "$ref": "#/definitions/stringStringsOrNull"
+        },
+        "peekEnd": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "stmt"
+      ]
+    },
+    "completionString": {
+      "$id": "#completionString",
+      "type": "object",
+      "properties": {
+        "type": {
+          "pattern": "^string$"
+        },
+        "id": {
+          "$ref": "#/definitions/stringOrNull"
+        },
+        "options": {
+          "oneOf": [{
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "completionNumber": {
+      "$id": "#completionNumber",
+      "type": "object",
+      "properties": {
+        "type": {
+          "pattern": "^number$"
+        },
+        "id": {
+          "$ref": "#/definitions/stringOrNull"
+        },
+        "integer": {
+          "$ref": "#/definitions/booleanOrNull"
+        },
+        "min": {
+          "$ref": "#/definitions/numberOrNull"
+        },
+        "max": {
+          "$ref": "#/definitions/numberOrNull"
+        }
+      }
+    },
+    "completionEmpty": {
+      "$id": "#completionEmpty",
+      "type": "null"
+    },
+    "topicName": {
+      "$id": "#topicName",
+      "type": "string"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "topic": {
+      "$ref": "#/definitions/topicName"
+    },
+    "interface": {
+      "description": "Identifier describing the interface this topic corresponds to, i.e. 'ds18b12', 'ina219', 'mx-array'",
+      "type": "string"
+    },
+    "logging": {
+      "description": "Used to override the logging of traffic through the selected topic. By default, all event and measurement topics should be logged and completion topics should not.",
+      "type": "boolean"
+    }
+  },
+  "oneOf": [{
+      "properties": {
+        "event": {
+          "type": "object",
+          "properties": {
+            "tags": {
+              "type": "string",
+              "description": "comma seperated list of c-style identifiers used as tags for the event",
+              "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(,[a-zA-Z_][a-zA-Z0-9_]*)*$"
+            },
+            "columns": {
+              "anyOf": [{
+                  "type": "array",
+                  "items": {
+                    "allOf": [{
+                        "$ref": "#/definitions/eventItem"
+                      },
+                      {
+                        "$ref": "#/definitions/requireName"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "$ref": "#/definitions/eventItem"
+                }
+              ]
+            },
+            "disregard_repeated": {
+              "type": "boolean",
+              "description": "Set to true to indicate this event to be a status reading, i.e. to disregard repeated messages."
+            }
+          }
+        }
+      },
+      "required": [
+        "event"
+      ]
+    },
+    {
+      "properties": {
+        "measurement": {
+          "anyOf": [{
+              "type": "array",
+              "items": {
+                "allOf": [{
+                    "$ref": "#/definitions/measurementItem"
+                  },
+                  {
+                    "$ref": "#/definitions/requireName"
+                  }
+                ]
+              }
+            },
+            {
+              "$ref": "#/definitions/measurementItem"
+            }
+          ]
+        }
+      },
+      "required": [
+        "measurement"
+      ]
+    },
+    {
+      "properties": {
+        "completion": {
+          "$ref": "#/definitions/completionNode"
+        },
+        "stdout": {
+          "$ref": "#/definitions/topicName",
+          "decription": "Topic to subscribe to for receiving stdout data in response to a command issued on the main topic. If ad-hoc channels are supported, this will be suffixed with the original command topic suffix (see adHocChannels)."
+        },
+        "stderr": {
+          "$ref": "#/definitions/topicName",
+          "decription": "Topic to subscribe to for receiving stderr data in response to a command issued on the main topic. If ad-hoc channels are supported, this will be suffixed with the original command topic suffix (see adHocChannels)."
+        },
+        "result": {
+          "$ref": "#/definitions/topicName",
+          "decription": "Topic to subscribe to for receiving result data in response to a command issued on the main topic. If ad-hoc channels are supported, this will be suffixed with the original command topic suffix (see adHocChannels)."
+        },
+        "adHocChannels": {
+          "type": "boolean",
+          "description": "If set to true, the service will respond to both the described topic itself *and* to any level one descendants of the topic (i.e. <topic>/my-channel), putting stdout, stderr and result messages on equally suffixed topics of the respective topic name property."
+        }
+      },
+      "required": [
+        "completion"
+      ]
+    }
+  ]
+}
